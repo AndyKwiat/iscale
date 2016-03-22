@@ -1,10 +1,10 @@
 package main
 
 import(
-_ "image/jpeg"
-"image/png"
+	_ "image/jpeg"
+	"image/png"
 	"image"
-"log"
+	"log"
 	"os"
 	"image/draw"
 	"image/color"
@@ -13,11 +13,61 @@ _ "image/jpeg"
 func main() {
 
 	pic := readPic("castle.png");
-	b:= pic.Bounds()
-	m:=image.NewRGBA(image.Rect(0,0,b.Dx(),b.Dy()));
-	draw.Draw(m,m.Bounds(),pic,b.Min,draw.Src)
-	m.Set(10,10,color.Black )
-	writePNG("test.png",m );
+	dstPic := resizeImage( pic, 100,100)
+	dstPic.Set(10,10,color.Black )
+	writePNG("test.png",dstPic );
+}
+func resizeImage( src image.Image, newWidth int, newHeight int ) *image.RGBA {
+	newSrc := image2RGBA(src );
+	dest:= image.NewRGBA( image.Rect(0,0,newWidth,newHeight))
+	resizeImageRGBA(newSrc,dest)
+	return dest
+}
+
+func image2RGBA( src image.Image ) *image.RGBA{
+	b:= src.Bounds()
+	newSrc:=image.NewRGBA(image.Rect(0,0,b.Dx(),b.Dy()))
+	draw.Draw(newSrc,newSrc.Bounds(),src,b.Min,draw.Src)
+	return newSrc;
+}
+
+func resizeImageRGBA( src *image.RGBA, dst *image.RGBA ){
+	//boundsSrc := src.Bounds()
+	boundsDst := dst.Bounds()
+	//xScalar := float32(boundsSrc.Dx()) / float32(boundsDst.Dx())
+	//yScalar := float32(boundsSrc.Dy()) / float32(boundsDst.Dy())
+
+	for  y:= boundsDst.Min.Y; y < boundsDst.Max.Y; y++ {
+		for x:= boundsDst.Min.X; x< boundsDst.Max.X; x++ {
+			dst.Set(x,y,color.RGBA{255,255,0,255})
+		}
+	}
+}
+
+func SampleRGBAArea ( src *image.RGBA, startX,startY,endX, endY float32) color.RGBA {
+	sx := startX * float32(src.Bounds().Max.X)
+	sy := startY * float32(src.Bounds().Max.Y)
+	ex := endX * float32(src.Bounds().Max.X)
+	ey := endY * float32(src.Bounds().Max.Y)
+	//log.Println("sx ",sx," ex",ex)
+	var sumr,sumg,sumb,suma float32
+	var numSamples float32
+	for x:= sx; x < ex; x++ {
+		for y:= sy; y < ey; y ++ {
+			clr := src.At(int(x),int(y))
+			r,g,b,a := clr.RGBA()
+			//log.Println("x ",x, " y",y, " r",r," g",g," b",b," a",a)
+			sumr += float32(r)
+			sumg += float32(g)
+			sumb += float32(b)
+			suma += float32(a)
+			numSamples += 1
+		}
+	}
+	//log.Println("numsamples: ",numSamples)
+	newColor := color.RGBA{uint8(sumr/numSamples),uint8(sumg/numSamples),uint8(sumb/numSamples),uint8(suma/numSamples)}
+	//log.Println("color",newColor)
+	return newColor
 }
 func writePNG( filename string , pic image.Image){
 	writer,err := os.Create(filename)
