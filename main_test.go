@@ -14,6 +14,16 @@ func TestMain( t *testing.T ){
 		{ 100,100,0,0,50},
 		{ 0,0,0,0,0},
 		{ 0,45,55,100,50},
+		{ 0,0,100,100,100},
+		{ 0,0,100,100,50},
+	}
+	sample := [][]float32{
+		{0,0,1,1},
+		{0,0,1,1},
+		{0,0,1,1},
+		{0,0,1,1},
+		{0.5,0,1,1},
+		{0,0.5,1,1},
 	}
 	for i:=0; i < len(test); i++ {
 
@@ -21,7 +31,7 @@ func TestMain( t *testing.T ){
 		input.Set(0, 1, color.RGBA{test[i][1], test[i][1], test[i][1], test[i][1]})
 		input.Set(1, 0, color.RGBA{test[i][2], test[i][2], test[i][2], test[i][2]})
 		input.Set(1, 1, color.RGBA{test[i][3], test[i][3], test[i][3], test[i][3]})
-		output := SampleRGBAArea(input, 0, 0, 1, 1)
+		output := SampleRGBAArea(input, sample[i][0],sample[i][1],sample[i][2],sample[i][3] )
 		expected := color.RGBA{test[i][4], test[i][4], test[i][4], test[i][4]}
 
 		if ( output.R != expected.R ) {

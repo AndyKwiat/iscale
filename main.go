@@ -49,14 +49,14 @@ func SampleRGBAArea ( src *image.RGBA, startX,startY,endX, endY float32) color.R
 	sy := startY * float32(src.Bounds().Max.Y)
 	ex := endX * float32(src.Bounds().Max.X)
 	ey := endY * float32(src.Bounds().Max.Y)
-	//log.Println("sx ",sx," ex",ex)
+	log.Println("sx ",sx," ex",ex)
 	var sumr,sumg,sumb,suma float32
 	var numSamples float32
 	for x:= sx; x < ex; x++ {
 		for y:= sy; y < ey; y ++ {
 			clr := src.At(int(x),int(y))
 			r,g,b,a := clr.RGBA()
-			//log.Println("x ",x, " y",y, " r",r," g",g," b",b," a",a)
+			log.Println("x ",x, " y",y, " r",r," g",g," b",b," a",a)
 			sumr += float32(r)
 			sumg += float32(g)
 			sumb += float32(b)
@@ -64,9 +64,9 @@ func SampleRGBAArea ( src *image.RGBA, startX,startY,endX, endY float32) color.R
 			numSamples += 1
 		}
 	}
-	//log.Println("numsamples: ",numSamples)
+	log.Println("numsamples: ",numSamples)
 	newColor := color.RGBA{uint8(sumr/numSamples),uint8(sumg/numSamples),uint8(sumb/numSamples),uint8(suma/numSamples)}
-	//log.Println("color",newColor)
+	log.Println("color",newColor)
 	return newColor
 }
 func writePNG( filename string , pic image.Image){
