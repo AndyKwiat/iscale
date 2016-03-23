@@ -5,7 +5,38 @@ import (
 	"image"
 	"image/color"
 	"math"
+	"strconv"
 )
+func testClr( t *testing.T, desc string, expected,actual uint32 ) {
+	if ( expected != actual ){
+		t.Error(desc," expected ",expected," got ",actual)
+	}
+}
+func TestResizeImage( t *testing.T ) {
+	input:= image.NewRGBA( image.Rect(0,0,2,2))
+	output:= image.NewRGBA (image.Rect(0,0,1,1))
+	test := [][]uint8{
+		{ 100,100,100,100,100},
+		{ 100,100,0,0,50},
+		{ 0,0,0,0,0},
+	}
+	for i:=0; i < len(test); i++ {
+		input.Set(0, 0, color.RGBA{test[i][0], test[i][0], test[i][0], test[i][0]})
+		input.Set(0, 1, color.RGBA{test[i][1], test[i][1], test[i][1], test[i][1]})
+		input.Set(1, 0, color.RGBA{test[i][2], test[i][2], test[i][2], test[i][2]})
+		input.Set(1, 1, color.RGBA{test[i][3], test[i][3], test[i][3], test[i][3]})
+
+		ResizeImageRGBA(input,output)
+		clr:= output.At(0,0)
+		r,g,b,a := clr.RGBA()
+		expected := uint32(test[i][4])<<8
+		testClr( t,"R"+strconv.Itoa(i),expected, r )
+		testClr( t,"G"+strconv.Itoa(i),expected, g )
+		testClr( t,"B"+strconv.Itoa(i),expected, b )
+		testClr( t,"A"+strconv.Itoa(i),expected, a )
+	}
+
+}
 
 func TestCalcEdge( t *testing.T ){
 	test:= [][]float32 {
@@ -22,7 +53,9 @@ func TestCalcEdge( t *testing.T ){
 		if math.Abs(float64(f-test[i][3]))>0.0001{
 			t.Error("CaclEdge fail, expected: ", test[i][3]," got ",f)
 		}
+
 	}
+
 
 }
 func TestMain( t *testing.T ){

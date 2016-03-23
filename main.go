@@ -14,13 +14,12 @@ func main() {
 
 	pic := readPic("castle.png");
 	dstPic := resizeImage( pic, 100,100)
-	dstPic.Set(10,10,color.Black )
 	writePNG("test.png",dstPic );
 }
 func resizeImage( src image.Image, newWidth int, newHeight int ) *image.RGBA {
 	newSrc := image2RGBA(src );
 	dest:= image.NewRGBA( image.Rect(0,0,newWidth,newHeight))
-	resizeImageRGBA(newSrc,dest)
+	ResizeImageRGBA(newSrc,dest)
 	return dest
 }
 
@@ -31,15 +30,18 @@ func image2RGBA( src image.Image ) *image.RGBA{
 	return newSrc;
 }
 
-func resizeImageRGBA( src *image.RGBA, dst *image.RGBA ){
-	//boundsSrc := src.Bounds()
+func ResizeImageRGBA( src *image.RGBA, dst *image.RGBA ){
 	boundsDst := dst.Bounds()
-	//xScalar := float32(boundsSrc.Dx()) / float32(boundsDst.Dx())
-	//yScalar := float32(boundsSrc.Dy()) / float32(boundsDst.Dy())
+	pixelSizeX := 1 / float32( boundsDst.Dx() )
+	pixelSizeY := 1 / float32( boundsDst.Dy() )
 
 	for  y:= boundsDst.Min.Y; y < boundsDst.Max.Y; y++ {
 		for x:= boundsDst.Min.X; x< boundsDst.Max.X; x++ {
-			dst.Set(x,y,color.RGBA{255,255,0,255})
+			sx := float32(x) / float32(boundsDst.Max.X)
+			sy := float32(y) / float32(boundsDst.Max.Y)
+			ex := sx + pixelSizeX
+			ey := sy + pixelSizeY
+			dst.Set(x,y,SampleRGBAArea(src,sx,sy,ex,ey))
 		}
 	}
 }
