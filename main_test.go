@@ -4,10 +4,29 @@ import (
 	"testing"
 	"image"
 	"image/color"
+	"math"
 )
 
+func TestCalcEdge( t *testing.T ){
+	test:= [][]float32 {
+		{0,0,10,1},
+		{1.1,1.1,10,.9},
+		{1.9,1.9,10,.1},
+		{9,1.9,10,1},
+		{9.1,1.9,10,1},
+		{9,1.9,9.6,.6},
+		{9.4,1.9,9.6,.6},
+	}
+	for i:=0; i < len(test); i++{
+		f:= CalcEdgeFraction(test[i][0],test[i][1],test[i][2])
+		if math.Abs(float64(f-test[i][3]))>0.0001{
+			t.Error("CaclEdge fail, expected: ", test[i][3]," got ",f)
+		}
+	}
 
+}
 func TestMain( t *testing.T ){
+
 	input:= image.NewRGBA( image.Rect(0,0,2,2))
 	test := [][]uint8{
 		{ 100,100,100,100,100},
@@ -16,6 +35,8 @@ func TestMain( t *testing.T ){
 		{ 0,45,55,100,50},
 		{ 0,0,100,100,100},
 		{ 0,0,100,100,50},
+		{ 100,100,100,100,100 },
+		{ 0,0,100,100,66 },
 	}
 	sample := [][]float32{
 		{0,0,1,1},
@@ -24,6 +45,8 @@ func TestMain( t *testing.T ){
 		{0,0,1,1},
 		{0.5,0,1,1},
 		{0,0.5,1,1},
+		{0.25,0,1,1},
+		{0.25,0,1,1},
 	}
 	for i:=0; i < len(test); i++ {
 

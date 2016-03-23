@@ -43,30 +43,46 @@ func resizeImageRGBA( src *image.RGBA, dst *image.RGBA ){
 		}
 	}
 }
-
+func CalcEdgeFraction( point, start, end float32 ) float32 {
+	var frac float32 = 1.0
+	if  point -1 < start {	// first iteration
+		frac -= point - float32(int(point))
+	}
+	if  point+1 >=end {	// last iteration
+		frac -= 1 - (end - float32(int(point)) )
+	}
+	return frac
+}
 func SampleRGBAArea ( src *image.RGBA, startX,startY,endX, endY float32) color.RGBA {
 	sx := startX * float32(src.Bounds().Max.X)
 	sy := startY * float32(src.Bounds().Max.Y)
 	ex := endX * float32(src.Bounds().Max.X)
 	ey := endY * float32(src.Bounds().Max.Y)
-	log.Println("sx ",sx," ex",ex)
+	//log.Println("sx ",sx," ex",ex)
 	var sumr,sumg,sumb,suma float32
 	var numSamples float32
-	for x:= sx; x < ex; x++ {
-		for y:= sy; y < ey; y ++ {
+
+	for y:= sy; y < ey; y ++ {
+		// check for edges
+		sampleFracY := CalcEdgeFraction( y, sy, ey )
+		for x:= sx; x < ex; x++ {
+			sampleFracX := CalcEdgeFraction( x, sx, ex )
+
 			clr := src.At(int(x),int(y))
 			r,g,b,a := clr.RGBA()
-			log.Println("x ",x, " y",y, " r",r," g",g," b",b," a",a)
-			sumr += float32(r)
-			sumg += float32(g)
-			sumb += float32(b)
-			suma += float32(a)
-			numSamples += 1
+			frac := sampleFracY * sampleFracX
+			//log.Println("x ",x, " y",y, " r",r," g",g," b",b," a",a," frac",frac," fx",sampleFracX, " fy",sampleFracY )
+			sumr += float32(r)*frac
+			sumg += float32(g)*frac
+			sumb += float32(b)*frac
+			suma += float32(a)*frac
+			numSamples += frac
 		}
 	}
-	log.Println("numsamples: ",numSamples)
-	newColor := color.RGBA{uint8(sumr/numSamples),uint8(sumg/numSamples),uint8(sumb/numSamples),uint8(suma/numSamples)}
-	log.Println("color",newColor)
+	//log.Println("sumr ",sumr )
+	//log.Println("numsamples: ",numSamples)
+	newColor := color.RGBA{uint8(uint32(sumr/numSamples)>>8),uint8(uint32(sumg/numSamples)>>8),uint8(uint32(sumb/numSamples)>>8),uint8(uint32(suma/numSamples)>>8)}
+	//log.Println("color",newColor)
 	return newColor
 }
 func writePNG( filename string , pic image.Image){
