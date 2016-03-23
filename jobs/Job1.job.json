@@ -1,0 +1,11 @@
+{
+    "Name": "Resize Stuff",
+    "InputFilter": "test.jpg",
+    "OutputPath": "output",
+    "Steps": [
+        {
+            "CommandLine": "main"
+        }
+    ],
+    "ID": "Job1"
+}
