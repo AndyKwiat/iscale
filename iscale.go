@@ -1,4 +1,4 @@
-package main
+package iscale
 
 import(
 	_ "image/jpeg"
@@ -8,22 +8,10 @@ import(
 	"os"
 	"image/draw"
 	"image/color"
-	"time"
 )
 
-func main() {
 
-	stime:= time.Now()
-	pic := readPic("big.jpg");
-	log.Println("read duration ",time.Since(stime).Seconds())
-	stime= time.Now()
-	//dstPic :=
-	resizeImage( pic, 200,200)
-	log.Println("resize duration ",time.Since(stime).Seconds())
-
-	//writePNG("test.png",dstPic );
-}
-func resizeImage( src image.Image, newWidth int, newHeight int ) *image.RGBA {
+func ResizeImage( src image.Image, newWidth int, newHeight int ) *image.RGBA {
 	newSrc := image2RGBA(src );
 	dest:= image.NewRGBA( image.Rect(0,0,newWidth,newHeight))
 	ResizeImageRGBA(newSrc,dest)
@@ -95,7 +83,7 @@ func SampleRGBAArea ( src *image.RGBA, startX,startY,endX, endY float32) color.R
 	//log.Println("color",newColor)
 	return newColor
 }
-func writePNG( filename string , pic image.Image){
+func WritePNG( filename string , pic image.Image){
 	writer,err := os.Create(filename)
 	defer writer.Close()
 	if err != nil {
@@ -107,7 +95,7 @@ func writePNG( filename string , pic image.Image){
 	}
 	log.Println("PNG written: ",filename)
 }
-func readPic( filename string ) image.Image {
+func ReadPic( filename string ) image.Image {
 	reader,err := os.Open(filename)
 	defer reader.Close()
 	if err != nil{
