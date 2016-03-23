@@ -8,13 +8,20 @@ import(
 	"os"
 	"image/draw"
 	"image/color"
+	"time"
 )
 
 func main() {
 
-	pic := readPic("castle.png");
-	dstPic := resizeImage( pic, 100,100)
-	writePNG("test.png",dstPic );
+	stime:= time.Now()
+	pic := readPic("big.jpg");
+	log.Println("read duration ",time.Since(stime).Seconds())
+	stime= time.Now()
+	//dstPic :=
+	resizeImage( pic, 200,200)
+	log.Println("resize duration ",time.Since(stime).Seconds())
+
+	//writePNG("test.png",dstPic );
 }
 func resizeImage( src image.Image, newWidth int, newHeight int ) *image.RGBA {
 	newSrc := image2RGBA(src );
@@ -53,6 +60,7 @@ func CalcEdgeFraction( point, start, end float32 ) float32 {
 	if  point+1 >=end {	// last iteration
 		frac -= 1 - (end - float32(int(point)) )
 	}
+
 	return frac
 }
 func SampleRGBAArea ( src *image.RGBA, startX,startY,endX, endY float32) color.RGBA {
