@@ -17,6 +17,7 @@ type Job struct{
 	ID string
 }
 
+var AllJobs []Job
 func main() {
 
 	myJob := Job{ "Resize Stuff",
