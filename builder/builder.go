@@ -1,10 +1,14 @@
-package main
+package builder
 
 import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
 )
+type Builder struct{
+	jobsFolder string
+	allJobs map[string]Job //https://blog.golang.org/go-maps-in-action
+}
 
 type JobStep struct {
 	CommandLine string
@@ -17,18 +21,32 @@ type Job struct{
 	ID string
 }
 
-var AllJobs []Job
-func main() {
+//-- jobs
+// addJob
+// listJobs
+// getJob
+// updateJob
+// deleteJob
 
-	myJob := Job{ "Resize Stuff",
-		"test.jpg",
-		"output",
-		[]JobStep{JobStep{"main"}},"Job1"}
-	SaveJob( myJob )
-	job,_ := LoadJob( "Job1")
-	log.Print(job)
+//-- tools
+// addTool
+// listTools
+// getTool
+// updateTool
+// deleteTool
 
+// -- filters
+// add, list, get, update, delete
+
+
+
+func Init( jobsFolder string)(Builder,error){
+	var builder Builder
+	builder.jobsFolder = jobsFolder
+	builder.allJobs = make(map[string]Job)
+	return builder,nil
 }
+
 func getFileNameForJobId( id string)string{
 	return "jobs/"+id+".job.json";
 }

@@ -1,13 +1,21 @@
 package main
 import (
 	"time"
-	"iscale"
+	"builder"
 	"log"
 	//"fmt"
 )
 
+func errorFunc( err error ){
+	log.Fatal(err)
+}
 func main() {
-	stime:= time.Now()
+	jobs,_ := builder.InitJobsRepo( "testdata/jobs")
+	job,_ := jobs.getJob("resizeTestImages")
+	job.run( func (){ log.Println("Done job")}, errorFunc)
+
+
+	/*stime:= time.Now()
 	pic := iscale.ReadPic("src1.png");
 	log.Println("read duration ",time.Since(stime).Seconds())
 	stime= time.Now()
@@ -15,7 +23,7 @@ func main() {
 	iscale.ResizeImage( pic, -1,256,16)
 	log.Println("resize duration ",time.Since(stime).Seconds())
 
-	iscale.WritePNG("test.png",dstPic );
+	iscale.WritePNG("test.png",dstPic );*/
 	/*c := make(chan int)
 	go test( 4,"p1" ,c)
 	go test( 1,"p2" ,c)
@@ -25,10 +33,3 @@ func main() {
 	}
 	fmt.Println("main done",x)*/
 }
-
-func test( num float32,desc string,c chan int){
-	println( desc, " started ")
-	time.Sleep(time.Duration(int64(num*1000)*int64(time.Millisecond)))
-	println( desc, " ended" )
-}
-

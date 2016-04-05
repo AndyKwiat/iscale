@@ -1,4 +1,4 @@
-package iscale
+package imgresize
 
 import (
 	"image"
