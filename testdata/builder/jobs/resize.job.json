@@ -1,0 +1,15 @@
+{
+    "InputFilter": "testdata/images",
+    "OutputPath": "",
+    "ID": "resize",
+    "OptionsMap": {
+        "*": {
+            "Height": 256,
+            "Width": 256
+        },
+        "testdata/images/big.jpg": {
+            "Height": 512,
+            "Width": 512
+        }
+    }
+}

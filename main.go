@@ -1,7 +1,7 @@
 package main
 import (
-	"time"
-	"builder"
+	//"time"
+	"iscale/builder"
 	"log"
 	//"fmt"
 )
@@ -10,9 +10,10 @@ func errorFunc( err error ){
 	log.Fatal(err)
 }
 func main() {
-	jobs,_ := builder.InitJobsRepo( "testdata/jobs")
-	job,_ := jobs.getJob("resizeTestImages")
-	job.run( func (){ log.Println("Done job")}, errorFunc)
+	//jobs,_ :=
+	builder.Init( "testdata/builder")
+	//job,_ := jobs.getJob("resizeTestImages")
+	//job.run( func (){ log.Println("Done job")}, errorFunc)
 
 
 	/*stime:= time.Now()

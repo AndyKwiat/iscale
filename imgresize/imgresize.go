@@ -10,6 +10,13 @@ import (
 	"os"
 )
 
+
+
+type Options struct {
+	Height int
+	Width int
+}
+
 const DoneCode = 1000
 
 func ResizeImage(src image.Image, newWidth int, newHeight int, threadCount int) *image.RGBA {

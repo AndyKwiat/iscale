@@ -4,22 +4,42 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
+	//"iscale/imgresize"
 )
 type Builder struct{
 	jobsFolder string
 	allJobs map[string]Job //https://blog.golang.org/go-maps-in-action
 }
 
-type JobStep struct {
-	CommandLine string
-}
+type ToolFunc func(inputFile,outputFile string, options interface{})
+
+
 type Job struct{
-	Name string
 	InputFilter string
 	OutputPath string
-	Steps []JobStep
+	OutputFileNamePattern string
 	ID string
+	OptionsMap map[string]interface{}
+	Tool ToolFunc
 }
+
+func (job *Job ) Run(){
+	files:= parseInputFilter( job.InputFilter)
+	for i,f := range files{
+		filename:= parsePattern(i,f,job.OutputFileNamePattern )
+		var filePath string= job.OutputPath + "/" + filename
+		job.Tool(f,filePath,job.OptionsMap["*"])
+	}
+}
+func parsePattern(number int, inputFile string, pattern string )(string){
+	return inputFile
+}
+func parseInputFilter( filter string ) (fileList []string ){
+	var files []string
+	files= append(files,filter)
+	return files
+}
+
 
 //-- jobs
 // addJob
@@ -40,18 +60,17 @@ type Job struct{
 
 
 
-func Init( jobsFolder string)(Builder,error){
-	var builder Builder
-	builder.jobsFolder = jobsFolder
-	builder.allJobs = make(map[string]Job)
-	return builder,nil
+
+func Init( jobsFolder string)(*Builder,error){
+	return nil,nil
 }
 
-func getFileNameForJobId( id string)string{
-	return "jobs/"+id+".job.json";
+func (b *Builder) getFileNameForJobId( id string)string{
+	return b.jobsFolder+"/jobs/"+id+".job.json";
 }
-func LoadJob( jobId string) (Job,error){
-	j ,err := ioutil.ReadFile(getFileNameForJobId( jobId))
+
+func (b *Builder)LoadJob( jobId string) (Job,error){
+	j ,err := ioutil.ReadFile(b.getFileNameForJobId( jobId))
 	if err == nil {
 		var myJob2 Job
 		err = json.Unmarshal(j, &myJob2)
@@ -68,14 +87,14 @@ func LoadJob( jobId string) (Job,error){
 
 }
 
-func SaveJob( job Job ) error{
+func (b *Builder)SaveJob( job Job ) error{
 	log.Println("saving job ",job.ID)
 	j,err := json.MarshalIndent(job,"","    ")
 	if err != nil{
 		log.Print(err)
 		return err
 	}
-	err = ioutil.WriteFile(getFileNameForJobId(job.ID),j,0644)
+	err = ioutil.WriteFile(b.getFileNameForJobId(job.ID),j,0644)
 	if err != nil{
 		log.Print(err)
 		return err
