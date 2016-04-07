@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
+	"path"
+	"strings"
+	"strconv"
 	//"iscale/imgresize"
 )
 type Builder struct{
@@ -21,22 +24,45 @@ type Job struct{
 	ID string
 	OptionsMap map[string]interface{}
 	Tool ToolFunc
+	RootPath string
 }
 
 func (job *Job ) Run(){
-	files:= parseInputFilter( job.InputFilter)
+	files:= parseInputFilter( job.RootPath+job.InputFilter)
 	for i,f := range files{
 		filename:= parsePattern(i,f,job.OutputFileNamePattern )
-		var filePath string= job.OutputPath + "/" + filename
+		var filePath string= job.RootPath+job.OutputPath + "/" + filename
 		job.Tool(f,filePath,job.OptionsMap["*"])
 	}
 }
 func parsePattern(number int, inputFile string, pattern string )(string){
-	return inputFile
+	index := strings.LastIndex(inputFile,path.Ext(inputFile))
+	inputFileBase := inputFile
+	if (index >=0 ){
+		inputFileBase = inputFile[:index]
+	}
+
+	inputFileBase = path.Base(inputFileBase)
+
+	file:= strings.Replace(pattern,"{inputFileBase}",inputFileBase,-1)
+	file= strings.Replace(file,"{#}",strconv.Itoa(number),-1)
+	return file
 }
 func parseInputFilter( filter string ) (fileList []string ){
-	var files []string
-	files= append(files,filter)
+	fileInfos,err := ioutil.ReadDir(filter)
+	var files []string;
+	if ( err == nil ){
+		for _,f := range fileInfos{
+			if ( !f.IsDir() ){
+				files = append(files,filter+"/"+f.Name())
+			}
+		}
+	} else {
+		log.Println(err)
+	}
+
+
+
 	return files
 }
 
