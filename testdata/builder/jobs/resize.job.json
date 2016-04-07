@@ -1,15 +1,8 @@
-{
+{ "ID": "resize",
+    "RootPath": "../",
     "InputFilter": "testdata/images",
-    "OutputPath": "",
-    "ID": "resize",
-    "OptionsMap": {
-        "*": {
-            "Height": 256,
-            "Width": 256
-        },
-        "testdata/images/big.jpg": {
-            "Height": 512,
-            "Width": 512
-        }
-    }
-}
+    "OutputPath": "testdata/output",
+    "OutputFileNamePattern": "{inputFileBase}-{#}.jpg",
+    "OptionsMap":
+    { ".": { "IntOption": 1, "StringOption": "Test" },
+        "testdata/images/big.jpg": { "IntOption": 3, "StringOption": "ggoody" } } }

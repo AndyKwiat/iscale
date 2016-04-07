@@ -1,6 +1,7 @@
 package builder
 import (
 	"testing"
+	"encoding/json"
 	"fmt"
 	. "github.com/smartystreets/goconvey/convey"
 )
@@ -33,14 +34,25 @@ func TestJobs( t *testing.T ){
 	j.OutputPath="testdata/output"
 	j.OutputFileNamePattern = "{inputFileBase}-{#}.jpg"
 	j.OptionsMap = make (map[string]interface{})
-	j.OptionsMap["*"]= MockOptions{1,"Test"}
+	j.OptionsMap["."]= MockOptions{1,"Test"}
 	j.OptionsMap["testdata/images/big.jpg"]=MockOptions{3,"ggoody"}
 	j.Tool = MockTool
 	j.Run()
 
-	Convey("Reading input Filter",t,func(){
+	json,_ := json.MarshalIndent(j,"","    ")
+	fmt.Println("json")
+	fmt.Print(string(json))
+
+
+
+	Convey("Reading input Filter and options",t,func(){
 		So(inputs[0],ShouldStartWith,j.RootPath+j.InputFilter)
 		So(outputs[0],ShouldStartWith,j.RootPath+j.OutputPath)
+		So(optionsList[1].IntOption,ShouldEqual,1)
+		So(optionsList[4].IntOption,ShouldEqual,1)
+		So(optionsList[5].StringOption,ShouldEqual,"Test")
+		So(optionsList[0].IntOption,ShouldEqual,3)
+		So(optionsList[0].StringOption,ShouldEqual,"ggoody")
 
 
 	})

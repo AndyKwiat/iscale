@@ -16,23 +16,36 @@ type Builder struct{
 
 type ToolFunc func(inputFile,outputFile string, options interface{})
 
-
+//http://play.golang.org/p/FL5eEgSXTT
 type Job struct{
+	ID string
+	Tool ToolFunc `json:"-"`
+	RootPath string
 	InputFilter string
 	OutputPath string
 	OutputFileNamePattern string
-	ID string
 	OptionsMap map[string]interface{}
-	Tool ToolFunc
-	RootPath string
 }
 
 func (job *Job ) Run(){
-	files:= parseInputFilter( job.RootPath+job.InputFilter)
+	files:= parseInputFilter( job.RootPath,job.InputFilter)
 	for i,f := range files{
 		filename:= parsePattern(i,f,job.OutputFileNamePattern )
 		var filePath string= job.RootPath+job.OutputPath + "/" + filename
-		job.Tool(f,filePath,job.OptionsMap["*"])
+		optPath := f
+		options := job.OptionsMap[optPath]
+		for options == nil {
+			log.Println(optPath)
+			if ( optPath == "" ){
+				options = job.OptionsMap["*"]
+				break;
+			}else{
+				optPath = path.Dir(optPath)
+				options = job.OptionsMap[optPath]
+			}
+		}
+
+		job.Tool(job.RootPath+f,filePath,options)
 	}
 }
 func parsePattern(number int, inputFile string, pattern string )(string){
@@ -48,8 +61,8 @@ func parsePattern(number int, inputFile string, pattern string )(string){
 	file= strings.Replace(file,"{#}",strconv.Itoa(number),-1)
 	return file
 }
-func parseInputFilter( filter string ) (fileList []string ){
-	fileInfos,err := ioutil.ReadDir(filter)
+func parseInputFilter( root,filter string ) (fileList []string ){
+	fileInfos,err := ioutil.ReadDir(root+filter)
 	var files []string;
 	if ( err == nil ){
 		for _,f := range fileInfos{
