@@ -1,7 +1,7 @@
 package builder
 import (
 	"testing"
-	"encoding/json"
+	//"encoding/json"
 	"fmt"
 	. "github.com/smartystreets/goconvey/convey"
 )
@@ -19,27 +19,31 @@ func MockTool( input,output string, options map[string]interface{}){
 	optionsList = append(optionsList,options)
 }
 
+// test input filter=src1.png
+// test compound input filter (src1.jpg;src2.jpg)
+
+// if file exists single.jpg delete single.jpg
+// test single, file exists (maybe use another mocktool)
+// run again test caching (job returns # of caches) // cache hash: tool_mergedoptions_filesize_filehash
 
 func TestJobs( t *testing.T ){
 
 	var j Job;
-	rootPath := "../"
+	rootPath := "../testdata/"
 	j.ID="resize"
-	j.InputFilter="testdata/images"
-	j.OutputPath="testdata/output"
+	j.InputFilter="images"
+	j.OutputPath="output"
 	j.OutputFileNamePattern = "{inputFileBase}-{#}.jpg"
 	j.OptionsMap = make (map[string]map[string]interface{})
 	j.OptionsMap["."]= map[string]interface{}{"IntOption":1,"StringOption":"Test"}
-	j.OptionsMap["testdata/images/big.jpg"]=map[string]interface{}{"IntOption":3}
+	j.OptionsMap["images/big.jpg"]=map[string]interface{}{"IntOption":3}
 
 	j.Run(rootPath, MockTool)
 
-	json,_ := json.MarshalIndent(j,"","    ")
+/*	json,_ := json.MarshalIndent(j,"","    ")
 	fmt.Println("json")
 	fmt.Print(string(json))
-
-
-
+*/
 	Convey("Reading input Filter and options",t,func(){
 		So(inputs[0],ShouldStartWith,rootPath+j.InputFilter)
 		So(outputs[0],ShouldStartWith,rootPath+j.OutputPath)
