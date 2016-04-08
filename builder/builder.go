@@ -14,38 +14,45 @@ type Builder struct{
 	allJobs map[string]Job //https://blog.golang.org/go-maps-in-action
 }
 
-type ToolFunc func(inputFile,outputFile string, options interface{})
+type ToolFunc func(inputFile,outputFile string, options map[string]interface{})
 
 //http://play.golang.org/p/FL5eEgSXTT
 type Job struct{
 	ID string
-	Tool ToolFunc `json:"-"`
-	RootPath string
+	ToolID string
 	InputFilter string
 	OutputPath string
 	OutputFileNamePattern string
-	OptionsMap map[string]interface{}
+	OptionsMap map[string]map[string]interface{}
 }
 
-func (job *Job ) Run(){
-	files:= parseInputFilter( job.RootPath,job.InputFilter)
+func (job *Job ) Run(RootPath string, tool ToolFunc ){
+	files:= parseInputFilter( RootPath,job.InputFilter)
 	for i,f := range files{
 		filename:= parsePattern(i,f,job.OutputFileNamePattern )
-		var filePath string= job.RootPath+job.OutputPath + "/" + filename
+		var filePath string= RootPath+job.OutputPath + "/" + filename
+
+		// figure out cascading options, we go through to the root folder and add any options along the way
 		optPath := f
-		options := job.OptionsMap[optPath]
-		for options == nil {
-			log.Println(optPath)
-			if ( optPath == "" ){
-				options = job.OptionsMap["*"]
+		var optionStack []map[string]interface{}
+		for  {
+			options := job.OptionsMap[optPath]
+			if ( options != nil ) {
+				optionStack = append([]map[string]interface{}{options},optionStack...)	// prepend
+			}
+			if ( optPath == ".") {
 				break;
-			}else{
-				optPath = path.Dir(optPath)
-				options = job.OptionsMap[optPath]
+			}
+			//log.Println(optPath)
+			optPath = path.Dir(optPath)
+		}
+		mergedOptions := make(map[string]interface{})
+		for _,v := range optionStack{
+			for key,value := range v{
+				mergedOptions[key] = value
 			}
 		}
-
-		job.Tool(job.RootPath+f,filePath,options)
+		tool(RootPath+f,filePath,mergedOptions)
 	}
 }
 func parsePattern(number int, inputFile string, pattern string )(string){
