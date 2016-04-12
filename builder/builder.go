@@ -8,6 +8,7 @@ import (
 	"strings"
 	"strconv"
 	//"iscale/imgresize"
+	"os"
 )
 type Builder struct{
 	jobsFolder string
@@ -43,7 +44,7 @@ func (job *Job ) Run(RootPath string, tool ToolFunc ){
 			if ( optPath == ".") {
 				break;
 			}
-			//log.Println(optPath)
+//			log.Println(optPath)
 			optPath = path.Dir(optPath)
 		}
 		mergedOptions := make(map[string]interface{})
@@ -69,19 +70,32 @@ func parsePattern(number int, inputFile string, pattern string )(string){
 	return file
 }
 func parseInputFilter( root,filter string ) (fileList []string ){
-	fileInfos,err := ioutil.ReadDir(root+filter)
 	var files []string;
-	if ( err == nil ){
-		for _,f := range fileInfos{
-			if ( !f.IsDir() ){
-				files = append(files,filter+"/"+f.Name())
+	filters := strings.Split(filter,";")
+	for _,filterToken := range filters {
+		fullPath := root + filterToken
+		stat, err := os.Stat(fullPath)
+		if ( err != nil ) {
+			log.Println(err)
+		} else {
+			if ( stat.Mode().IsDir()) {
+				fileInfos, err := ioutil.ReadDir(root + filter)
+
+				if ( err == nil ) {
+					for _, f := range fileInfos {
+						if ( !f.IsDir() ) {
+							files = append(files, filterToken + "/" + f.Name())
+						}
+					}
+				} else {
+					log.Println(err)
+				}
+			} else {
+				files = append(files, filterToken)
 			}
 		}
-	} else {
-		log.Println(err)
+
 	}
-
-
 
 	return files
 }
