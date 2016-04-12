@@ -2,13 +2,17 @@ package builder
 import (
 	"testing"
 	//"encoding/json"
-	//"fmt"
+	"log"
 	. "github.com/smartystreets/goconvey/convey"
+	"encoding/json"
+	"io/ioutil"
+	"os"
 )
 
 var inputs []string
 var outputs []string
 var optionsList []map[string]interface{}
+
 
 func MockTool( input,output string, options map[string]interface{}){
 
@@ -16,6 +20,20 @@ func MockTool( input,output string, options map[string]interface{}){
 	inputs = append(inputs,input)
 	outputs = append(outputs,output)
 	optionsList = append(optionsList,options)
+}
+
+func DummyFileTool( input,output string, options map[string]interface{}){
+	options["inputFileNameHash"]=input;
+	j,err := json.MarshalIndent(options,"","    ")
+	if err != nil{
+		log.Print(err)
+		return
+	}
+	err = ioutil.WriteFile(output,j,0644)
+	if err != nil{
+		log.Print(err)
+		return
+	}
 }
 
 
@@ -28,6 +46,29 @@ func clearResult(){
 	optionsList = nil
 }
 
+func TestDummyTool ( t *testing.T ){
+	clearResult()
+	var j Job
+	rootPath := "../testdata/"
+	j.ID="resize"
+	j.InputFilter="images/src1.png"
+	j.OutputPath="output"
+	j.OutputFileNamePattern = "testDummy.json"
+	j.OptionsMap = make (map[string]map[string]interface{})
+	j.OptionsMap["."]= map[string]interface{}{"IntOption":1,"StringOption":"Test"}
+	j.OptionsMap["images"]= map[string]interface{}{"IntOption":2}
+	j.OptionsMap["images/src2.png"]=map[string]interface{}{"StringOption":"Test2"}
+
+	expectedPath := rootPath + j.OutputPath + "/testDummy.json";
+	os.Remove(expectedPath)
+	Convey("test dummy tool", t, func() {
+		_,err := os.Stat(expectedPath);
+		So(err,ShouldNotBeNil)
+		j.Run(rootPath,DummyFileTool);
+		_,err = os.Stat(expectedPath);
+		So(err,ShouldBeNil);
+	})
+}
 func TestMultipleFiles( t *testing.T ){
 	clearResult()
 	var j Job
