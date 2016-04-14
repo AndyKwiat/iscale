@@ -27,7 +27,7 @@ type Job struct{
 	OptionsMap map[string]map[string]interface{}
 }
 
-func (job *Job ) Run(RootPath string, tool ToolFunc ){
+func (job *Job ) Run(RootPath string, tool ToolFunc, cacher *fileCache ){
 	files:= parseInputFilter( RootPath,job.InputFilter)
 	for i,f := range files{
 		filename:= parsePattern(i,f,job.OutputFileNamePattern )
@@ -53,8 +53,16 @@ func (job *Job ) Run(RootPath string, tool ToolFunc ){
 				mergedOptions[key] = value
 			}
 		}
-		tool(RootPath+f,filePath,mergedOptions)
+		if ( !cacher.CheckCached( job.ToolID,RootPath, f, filePath,mergedOptions ) ) {
+			tool(RootPath + f, filePath, mergedOptions)
+			cacher.AddCache(job.ToolID,RootPath, f, filePath,mergedOptions )
+		}
 	}
+}
+
+func checkCache( toolId,RootPath,inputFilePath,outputFilePath string, options map[string]interface{} )(bool){
+
+	return false;
 }
 func parsePattern(number int, inputFile string, pattern string )(string){
 	index := strings.LastIndex(inputFile,path.Ext(inputFile))

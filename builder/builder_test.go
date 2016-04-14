@@ -12,7 +12,7 @@ import (
 var inputs []string
 var outputs []string
 var optionsList []map[string]interface{}
-
+var cachedJob []bool
 
 func MockTool( input,output string, options map[string]interface{}){
 
@@ -34,21 +34,24 @@ func DummyFileTool( input,output string, options map[string]interface{}){
 		log.Print(err)
 		return
 	}
+	cachedJob = append(cachedJob,false)
 }
 
 
-// if file exists single.jpg delete single.jpg
-// test single, file exists (maybe use another mocktool)
+
 // run again test caching (job returns # of caches) // cache hash: tool_mergedoptions_filesize_filehash
 func clearResult(){
 	inputs = nil
 	outputs = nil
 	optionsList = nil
+	cachedJob = nil
+
 }
 
-func TestDummyTool ( t *testing.T ){
+func TestCacheAndDummyTool ( t *testing.T ){
 	clearResult()
 	var j Job
+	var c fileCache
 	rootPath := "../testdata/"
 	j.ID="resize"
 	j.InputFilter="images/src1.png"
@@ -64,14 +67,31 @@ func TestDummyTool ( t *testing.T ){
 	Convey("test dummy tool", t, func() {
 		_,err := os.Stat(expectedPath);
 		So(err,ShouldNotBeNil)
-		j.Run(rootPath,DummyFileTool);
+		j.Run(rootPath,DummyFileTool,&c);
 		_,err = os.Stat(expectedPath);
 		So(err,ShouldBeNil);
 	})
+
+	os.Remove(expectedPath)
+	Convey( "test caching", t, func() {
+		clearResult()
+		// clear cache
+		j.Run(rootPath,DummyFileTool,&c);
+		info1,err1 := os.Stat(expectedPath)
+		So(err1,ShouldBeNil)
+		j.Run(rootPath,DummyFileTool,&c);
+		info2,err2 := os.Stat(expectedPath)
+		So(err2,ShouldBeNil)
+		So(info1.ModTime().String(),ShouldEqual,info2.ModTime().String())
+
+
+	})
+
 }
 func TestMultipleFiles( t *testing.T ){
 	clearResult()
 	var j Job
+	var c fileCache
 	rootPath := "../testdata/"
 	j.ID="resize"
 	j.InputFilter="images/src1.png;images/src2.png"
@@ -81,7 +101,7 @@ func TestMultipleFiles( t *testing.T ){
 	j.OptionsMap["."]= map[string]interface{}{"IntOption":1,"StringOption":"Test"}
 	j.OptionsMap["images"]= map[string]interface{}{"IntOption":2}
 	j.OptionsMap["images/src2.png"]=map[string]interface{}{"StringOption":"Test2"}
-	j.Run(rootPath,MockTool);
+	j.Run(rootPath,MockTool,&c);
 	Convey("test two", t, func() {
 		So(len(outputs),ShouldEqual,2)
 		So(outputs[0],ShouldEqual,rootPath+j.OutputPath+"/src1-0.jpg")
@@ -96,6 +116,7 @@ func TestMultipleFiles( t *testing.T ){
 func TestSingle( t *testing.T){
 	clearResult()
 	var j Job;
+	var c fileCache
 	rootPath := "../testdata/"
 	j.ID="resize"
 	j.InputFilter="images/src1.png"
@@ -103,7 +124,7 @@ func TestSingle( t *testing.T){
 	j.OutputFileNamePattern = "{inputFileBase}-{#}.jpg"
 	j.OptionsMap = make (map[string]map[string]interface{})
 	j.OptionsMap["."]= map[string]interface{}{"IntOption":1,"StringOption":"Test"}
-	j.Run(rootPath,MockTool);
+	j.Run(rootPath,MockTool,&c);
 	Convey("test single", t, func() {
 		So(len(outputs),ShouldEqual,1)
 		So(outputs[0],ShouldEqual,rootPath+j.OutputPath+"/src1-0.jpg")
@@ -112,6 +133,7 @@ func TestSingle( t *testing.T){
 func TestJobs( t *testing.T ){
 	clearResult()
 	var j Job;
+	var c fileCache
 	rootPath := "../testdata/"
 	j.ID="resize"
 	j.InputFilter="images"
@@ -121,7 +143,7 @@ func TestJobs( t *testing.T ){
 	j.OptionsMap["."]= map[string]interface{}{"IntOption":1,"StringOption":"Test"}
 	j.OptionsMap["images/big.jpg"]=map[string]interface{}{"IntOption":3}
 
-	j.Run(rootPath, MockTool)
+	j.Run(rootPath, MockTool,&c)
 
 /*	json,_ := json.MarshalIndent(j,"","    ")
 	fmt.Println("json")
