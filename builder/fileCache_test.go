@@ -30,5 +30,27 @@ func TestCache( t *testing.T ) {
 		cached= cacher.CheckCached(tool,root,inputFile,outputFile,mergedOptions)
 		So(cached,ShouldBeTrue)
 
+		Convey("new tool",func(){
+		tool = "newTool"
+		cached= cacher.CheckCached(tool,root,inputFile,outputFile,mergedOptions)
+		So(cached,ShouldBeFalse)})
+
+		Convey("new option",func(){
+			mergedOptions["MyOption"]=2
+			cached= cacher.CheckCached(tool,root,inputFile,outputFile,mergedOptions)
+			So(cached,ShouldBeFalse)
+			mergedOptions["MyOption"]=1
+			cached= cacher.CheckCached(tool,root,inputFile,outputFile,mergedOptions)
+			So(cached,ShouldBeTrue)
+		})
+		Convey("new input",func(){
+			inputFile := "images/src2.png"
+			cached= cacher.CheckCached(tool,root,inputFile,outputFile,mergedOptions)
+			So(cached,ShouldBeFalse)
+			inputFile = "images/src1.png"
+			cached= cacher.CheckCached(tool,root,inputFile,outputFile,mergedOptions)
+			So(cached,ShouldBeTrue)})
+
+
 	})
 }
