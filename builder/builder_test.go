@@ -38,7 +38,7 @@ func DummyFileTool( input,output string, options map[string]interface{}){
 
 
 
-// run again test caching (job returns # of caches) // cache hash: tool_mergedoptions_filesize_filehash
+
 func clearResult(){
 	inputs = nil
 	outputs = nil

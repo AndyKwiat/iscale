@@ -1,3 +1,14 @@
+// get imagesizer to be command line
+// create tool config (w/ command line options)
+// generic toolfunc that takes tool.config and runs it
+// map tool config/ toolfunc to tool.id
+// create basic imgresize job using json edit -- redirect stderr,stdoutput, report on job in command line
+// create treegraph editor (just use lists in html), let's you customize config per file/folder
+//	--jobs: create, load, update, delete, run
+//	-- idea : git config files
+// extra info option: eg. get pixel size of input files
+// 
+
 package builder
 
 import (
@@ -60,10 +71,7 @@ func (job *Job ) Run(RootPath string, tool ToolFunc, cacher *fileCache ){
 	}
 }
 
-func checkCache( toolId,RootPath,inputFilePath,outputFilePath string, options map[string]interface{} )(bool){
 
-	return false;
-}
 func parsePattern(number int, inputFile string, pattern string )(string){
 	index := strings.LastIndex(inputFile,path.Ext(inputFile))
 	inputFileBase := inputFile

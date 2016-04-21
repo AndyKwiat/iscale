@@ -24,7 +24,7 @@ func makeHash( tool,rootPath,filePath string, options interface{})(string){
 }
 func ( fc *fileCache)AddCache( toolId,RootPath,inputFilePath,outputFilePath string, options map[string]interface{} ){
 
-	fmt.Println("add cache start")
+	//fmt.Println("add cache start")
 	hash := makeHash ( toolId,RootPath,inputFilePath,options);
 	_,err := os.Stat(outputFilePath)
 	if err != nil {
@@ -40,7 +40,7 @@ func ( fc *fileCache)AddCache( toolId,RootPath,inputFilePath,outputFilePath stri
 }
 
 func (fc *fileCache)CheckCached( toolId,RootPath,inputFilePath,outputFilePath string, options map[string]interface{} )(bool){
-	fmt.Println("startcache")
+	//fmt.Println("startcache")
 	hash := makeHash ( toolId,RootPath,inputFilePath,options);
 	outputHash := fc.fileMap[hash]
 	if  outputHash == ""{
